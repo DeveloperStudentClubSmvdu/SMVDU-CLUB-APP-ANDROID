@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="spscreen">#371B1B</color>
+    <color name="gradient">#371B1B</color>
+    <color name="theme_color">#2514E4</color>
+    <color name="black_overlay">#66000000</color>
+    <color name="hintColor">#2F000000</color>
+    <color name="button2color">#373737</color>
+    <color name="textColor">#595959</color>
+    <color name="cardcolor">#ffF9F9F9</color>
+    <color name="clubcardcolor">#FFEBF5FF</color>
+
+</resources>

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "432803079951",
+    "project_id": "smvduclub",
+    "storage_bucket": "smvduclub.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:432803079951:android:7ed4ffca2833e103c0807a",
+        "android_client_info": {
+          "package_name": "com.akash.smvduclubapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "432803079951-84sdfkttkjn8arj7ueoo22roq20qltkc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.akash.smvduclubapp",
+            "certificate_hash": "010674cf3d0964da70964a473c508ca070ae086e"
+          }
+        },
+        {
+          "client_id": "432803079951-rjtk6nnigrjt3cf4it18v5j4odo8intr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCI54j27vZJ6X-le-ia3SjOAUV5LaOFLX0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "432803079951-rjtk6nnigrjt3cf4it18v5j4odo8intr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

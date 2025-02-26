@@ -1,0 +1,244 @@
+package com.akash.smvduclubapp.screen
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.akash.smvduclubapp.R
+import com.akash.smvduclubapp.data.Club
+import com.akash.smvduclubapp.data.Event
+import com.akash.smvduclubapp.data.getDummyEvents
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ClubDetailScreen(navController: NavController, clubName: String?) {
+    val club = Club.getDummyClubs().find { it.name == clubName }
+    val events = getDummyEvents()
+    val scrollState = rememberScrollState()
+    val isScrolling = remember { derivedStateOf { scrollState.value > 10 } }
+
+    if (club == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                text = stringResource(id = R.string.club_error),
+                fontSize = 20.sp,
+                color = Color.Red
+            )
+        }
+        return
+    }
+
+    Scaffold(
+        topBar = {
+            Box(
+                modifier = Modifier.height(0.dp)
+            ) {
+                AnimatedVisibility(visible = !isScrolling.value) {
+                    TopAppBar(
+                        title = { Text(text = club.name, fontSize = 20.sp) },
+                        navigationIcon = {
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.baseline_arrow_back_24),
+                                    contentDescription = "Back"
+                                )
+                            }
+                        },
+                    )
+                }
+            }
+        }
+    )
+    { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(paddingValues)
+                .verticalScroll(scrollState)
+        ) {
+            val imageSize by animateDpAsState(if (isScrolling.value) 80.dp else 120.dp)
+            val textSize by animateFloatAsState(if (isScrolling.value) 20f else 28f)
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                colorResource(id = R.color.theme_color),
+                                Color(0xFF005F9E)
+                            )
+                        ),
+                        shape = RoundedCornerShape(bottomStart = 50.dp, bottomEnd = 50.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+
+                ) {
+                    Image(
+                        painter = painterResource(id = club.logoResId),
+                        contentDescription = "${club.name} Logo",
+                        modifier = Modifier
+                            .size(imageSize)
+                            .clip(CircleShape)
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = club.name,
+                        fontSize = textSize.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            AnimatedVisibility(visible = !isScrolling.value) {
+                Text(
+                    text = club.description,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center,
+                    color = Color.Gray,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            AnimatedVisibility(visible = !isScrolling.value) {
+                Button(
+                    onClick = { /* Handle join club action */ },
+                    modifier = Modifier.fillMaxWidth().height(50.dp).padding(horizontal = 16.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(text = stringResource(id = R.string.join_club), fontSize = 18.sp)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = stringResource(id = R.string.events_organized),
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 15.dp)
+                    .height(650.dp)
+            )  {
+                val eventScrollState = rememberScrollState()
+                val isEventScrollable = remember { derivedStateOf { isScrolling.value } }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(if (isEventScrollable.value) Modifier.verticalScroll(eventScrollState) else Modifier)
+                ) {
+                    events.forEach { event ->
+                        EventCard(event, navController)
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+// Event Card UI
+@Composable
+fun EventCard(event: Event,navController: NavController) {
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 5.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 10.dp)
+            .clickable {
+                // Handle Click Action Here
+                navController.navigate("eventDetails/${event.title}")
+            }
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = event.title,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Image(
+                painter = painterResource(id = event.posterResId),
+                contentDescription = "${event.title} Poster",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .clip(RoundedCornerShape(15.dp))
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = event.description,
+                fontSize = 16.sp,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "📅 ${event.date}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF007BFF)
+            )
+        }
+    }
+}

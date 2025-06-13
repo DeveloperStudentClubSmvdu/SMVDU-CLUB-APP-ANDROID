@@ -1,0 +1,13 @@
+<!-- res/drawable/splash_background.xml -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background color -->
+    <item android:drawable="@color/spscreen" />
+
+    <!-- Logo/Image centered on screen -->
+    <item>
+        <bitmap
+            android:src="@drawable/smvdu_splash"
+            android:gravity="fill" />
+
+    </item>
+</layer-list>

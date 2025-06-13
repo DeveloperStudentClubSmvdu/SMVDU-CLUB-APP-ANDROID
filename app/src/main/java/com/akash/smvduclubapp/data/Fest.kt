@@ -1,19 +1,29 @@
+@file:OptIn(SupabaseExperimental::class, SupabaseInternal::class)
 package com.akash.smvduclubapp.data
 
-import androidx.compose.foundation.layout.Row
-import com.akash.smvduclubapp.R
+import com.akash.smvduclubapp.database.supabase
+import io.github.jan.supabase.annotations.SupabaseExperimental
+import io.github.jan.supabase.annotations.SupabaseInternal
+import io.github.jan.supabase.postgrest.from
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Fest(
-    val title: String,
-    val date: String,
+    val id: String,
+    val name: String,
+    val fest_date: String,
     val description: String,
-    val logoResId: Int
+    val fest_logo: String
 )
 
-fun getDummyUniversityFests(): List<Fest> {
-    return listOf(
-        Fest("Ekatva", "28 Feb - 2 Feb", "Ekatva is an annual tech fest that showcases cutting-edge technology, innovation, and coding challenges, attracting participants from various institutions.",
-            R.drawable.gdsc_dp),
-        Fest("Resurgence", "18 Sept - 22 Sept", "Resurgence is an annual cultural fest featuring music, dance, drama, and art competitions, celebrating diverse traditions and creative talents.",
-            R.drawable.gdsc_dp)
-    )
+
+suspend fun fetchFests(): List<Fest> {
+    return try {
+        supabase.from("university_fest")
+            .select()
+            .decodeList<Fest>()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        emptyList()
+    }
 }

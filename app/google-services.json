@@ -1,41 +1,42 @@
 {
   "project_info": {
-    "project_number": "432803079951",
-    "project_id": "smvduclub",
-    "storage_bucket": "smvduclub.firebasestorage.app"
+    "project_number": "24247447539",
+    "firebase_url": "https://smvduclubapp-default-rtdb.firebaseio.com",
+    "project_id": "smvduclubapp",
+    "storage_bucket": "smvduclubapp.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:432803079951:android:7ed4ffca2833e103c0807a",
+        "mobilesdk_app_id": "1:24247447539:android:18a25a26a1fea861c76c86",
         "android_client_info": {
           "package_name": "com.akash.smvduclubapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "432803079951-84sdfkttkjn8arj7ueoo22roq20qltkc.apps.googleusercontent.com",
+          "client_id": "24247447539-20phngr5rj1ocqaplc54edqspm1djgbq.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.akash.smvduclubapp",
-            "certificate_hash": "010674cf3d0964da70964a473c508ca070ae086e"
+            "certificate_hash": "974687b7edc06d4c693e49c40d1d2c3362d9e398"
           }
         },
         {
-          "client_id": "432803079951-rjtk6nnigrjt3cf4it18v5j4odo8intr.apps.googleusercontent.com",
+          "client_id": "24247447539-aqc10apj5enj2chp4obv8m3bpq54s2b9.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCI54j27vZJ6X-le-ia3SjOAUV5LaOFLX0"
+          "current_key": "AIzaSyBRkKPVSfjXnXw2p8F0g8jOZhXSZ-HI5M0"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "432803079951-rjtk6nnigrjt3cf4it18v5j4odo8intr.apps.googleusercontent.com",
+              "client_id": "24247447539-aqc10apj5enj2chp4obv8m3bpq54s2b9.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

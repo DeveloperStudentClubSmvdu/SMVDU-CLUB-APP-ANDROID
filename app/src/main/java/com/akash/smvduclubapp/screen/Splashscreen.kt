@@ -30,7 +30,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun SplashScreen(onTimeout: () -> Unit) {
     LaunchedEffect(Unit) {
-        delay(500)  // Show splash screen for 2 seconds
+        delay(100)  // Show splash screen for 2 seconds
         onTimeout()  // Navigate to the main screen
     }
     Box(
@@ -41,20 +41,15 @@ fun SplashScreen(onTimeout: () -> Unit) {
             verticalArrangement = Arrangement.Center ) {
             Image(
                 painter = painterResource(id = R.drawable.smvdu_logo), contentDescription = "logo",
-                Modifier.size(180.dp, 160.dp)
+                Modifier.size(190.dp, 170.dp)
             )
             Spacer(modifier = Modifier.padding(24.dp),)
             Text(
                 "SMVDU CLUBS",
-                style = TextStyle(fontFamily = poppinsFontFamily, fontSize = 20.sp),
+                style = TextStyle(fontFamily = poppinsFontFamily, fontSize = 22.sp),
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
         }
     }
 }
-//@Preview(showBackground = true, showSystemUi = true)
-//@Composable
-//private fun prevSpScr() {
-//    SplashScreen()
-//}

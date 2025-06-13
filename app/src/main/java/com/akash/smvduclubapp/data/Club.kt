@@ -1,37 +1,125 @@
+@file:OptIn(SupabaseExperimental::class, SupabaseInternal::class)
 package com.akash.smvduclubapp.data
 
-import com.akash.smvduclubapp.R
+import android.util.Log
+import com.akash.smvduclubapp.database.supabase
+import io.github.jan.supabase.annotations.SupabaseExperimental
+import io.github.jan.supabase.annotations.SupabaseInternal
+import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.postgrest
+import kotlinx.serialization.Serializable
+import kotlin.text.get
 
+
+@Serializable
 data class Club(
+   val clubId: String,
+   // val departmentId: String?,
     val name: String,
+   // val email: String?,
     val description: String,
-    val logoResId: Int,
-
+   // val coordinator: String?,
+   /// val coCoordinator: String?,
+   /// val createdAt: String?,
+  //  val clubTitle: String?,
+    val club_logo: String,
+    val club_category: Long,
 )
-{
-    companion object {
-        fun getDummyClubs(): List<Club> {
-            return listOf(
-                Club("Code Club", "A community for coding enthusiasts.", R.drawable.gdsc_dp),
-                Club("AET Club", "A club for automation and embedded technology.", R.drawable.gdsc_dp),
-                Club("AI Club", "A hub for AI and machine learning enthusiasts.", R.drawable.gdsc_dp),
-                Club("GDSC", "Google Developer Student Club for tech enthusiasts.", R.drawable.gdsc_dp),
-                Club("Tarang", "The Electronics and Communication Engineering Club.", R.drawable.gdsc_dp),
-                Club("SAE Club", "A society for automotive engineering enthusiasts.", R.drawable.gdsc_dp),
-                Club("Prishthabhoomi", "A club dedicated to environmental sustainability.", R.drawable.gdsc_dp),
-                Club("Pratibimb", "The Social Media and PR Club.", R.drawable.gdsc_dp),
-                Club("Mosaic", "The design community for creative minds.", R.drawable.gdsc_dp),
-                Club("Discipline Community", "A community focused on student discipline and conduct.", R.drawable.gdsc_dp),
-                Club("Aayojan", "The event planning and management club.", R.drawable.gdsc_dp),
-                Club("Yoga Club", "A community promoting physical and mental well-being.", R.drawable.gdsc_dp),
-                Club("Vyom", "The Astronomy Club for space and celestial exploration.", R.drawable.gdsc_dp),
-                Club("Aalap", "The Music Club for singers and instrumentalists.", R.drawable.gdsc_dp),
-                Club("Shabdharth", "The literary club for writers and poets.", R.drawable.gdsc_dp),
-                Club("Zenith", "A club for students aiming for excellence in various fields.", R.drawable.gdsc_dp),
-                Club("Kala Kshetra", "The Arts Club for painting and creativity.", R.drawable.gdsc_dp),
-                Club("Atelier", "The Multimedia Club for digital media enthusiasts.", R.drawable.gdsc_dp),
-                Club("Yuva Tourism Club", "The event management and tourism club.", R.drawable.gdsc_dp)
-            )
-        }
+
+@Serializable
+data class UserClubRelation(
+    val id: Long? = null,
+    val created_at: String? = null,
+    val user_id: String? = null,
+    val club_id: String? = null
+)
+
+
+suspend fun fetchClubs(): List<Club> {
+    return try {
+        supabase.from("clubs")
+            .select()
+            .decodeList<Club>()  // Fetch everything as Map
+
+    } catch (e: Exception) {
+        e.printStackTrace()
+        emptyList()
     }
 }
+
+suspend fun fetchClubsByCategory(categoryId: Long): List<Club> =
+    supabase.from("clubs")
+        .select{
+            filter{
+                eq("club_category", categoryId)
+            }
+        }
+        .decodeList<Club>()
+
+
+suspend fun saveUserClubRelationToSupabase(userId: String, clubId: String) {
+    try {
+        // Use the existing supabase client instead of creating a new one
+        val response = supabase.postgrest["user_club_relation"]
+            .insert(
+                mapOf(
+                    "user_id" to userId,
+                    "club_id" to clubId
+                )
+            )
+        Log.d("Supabase", "Saved user-club relation: $userId - $clubId")
+    } catch (e: Exception) {
+        Log.e("Supabase", "Error saving user-club relation: ${e.message}")
+        throw e
+    }
+}
+
+suspend fun fetchUserClubs(userId: String): List<Club> {
+    try {
+        Log.d("Supabase", "Fetching clubs for user: $userId")
+
+        // Get user-club relations
+        val userClubResponse = supabase.from("user_club_relation")
+            .select{
+            filter {
+                eq("user_id", userId)
+            }
+            }
+            .decodeList<UserClubRelation>()
+
+        Log.d("Supabase", "Found ${userClubResponse.size} club relations")
+
+        if (userClubResponse.isEmpty()) {
+            return emptyList()
+        }
+
+        // Get all clubIds
+        val clubIds = userClubResponse.mapNotNull { it.club_id }
+        Log.d("Supabase", "Club IDs: $clubIds")
+
+        // Fetch clubs
+        val clubs = mutableListOf<Club>()
+        for (clubId in clubIds) {
+            try {
+                val club = supabase.from("clubs")
+                    .select{
+                        filter {
+                            eq("clubId", clubId)
+                        }
+                    }
+                    .decodeSingle<Club>()
+                clubs.add(club)
+                Log.d("Supabase", "Successfully fetched club: ${club.name}")
+            } catch (e: Exception) {
+                Log.e("Supabase", "Error fetching club $clubId: ${e.message}")
+            }
+        }
+
+        return clubs
+    } catch (e: Exception) {
+        Log.e("Supabase", "Error in fetchUserClubs: ${e.message}", e)
+        return emptyList()
+    }
+}
+
+// Add this data class to handle the relation table

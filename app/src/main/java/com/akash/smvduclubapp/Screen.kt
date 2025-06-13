@@ -14,4 +14,10 @@ sealed class Screen(val route:String){
     object ClubDetailScreen:Screen("clubdetailscreen")
     object EventListScreen:Screen("eventlistscreen")
     object FestDetailScreen:Screen("festdetailscreen")
+    object EventRegistrationForm:Screen("eventregistrationform")
+    object VCMessageScreen:Screen("vcmessagescreen")
+    object ActivityHeadScreen:Screen("activityheadscreen")
+    object ChatScreen:Screen("chatscreen")
+    object MyClubScreen:Screen("myclubscreen")
+    object MyEventScreen:Screen("myeventscreen")
 }

@@ -1,5 +1,6 @@
 package com.akash.smvduclubapp.screen
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,17 +18,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,15 +52,54 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.akash.smvduclubapp.R
-import com.akash.smvduclubapp.data.getDummyEvents
-import com.akash.smvduclubapp.data.getTopics
+import com.akash.smvduclubapp.data.Event
+import com.akash.smvduclubapp.data.EventDescription
+import com.akash.smvduclubapp.data.TopicData
+import com.akash.smvduclubapp.data.fetchEventDescription
+import com.akash.smvduclubapp.data.fetchEvents
+import com.akash.smvduclubapp.data.isUserRegisteredForEvent
+import com.akash.smvduclubapp.data.topicColors
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun EventDetailScreen(navController: NavController, eventTitle: String?) {
-    val event = getDummyEvents().find { it.title == eventTitle }
+    val scope = rememberCoroutineScope()
+    var allEvents by remember { mutableStateOf<List<Event>>(emptyList()) }
 
+    // Fetch events when the Composable is launched
+    var isLoading by remember { mutableStateOf(true) }
+    var isUserRegistered by remember { mutableStateOf(false) }
+
+    LaunchedEffect(true) {
+        scope.launch {
+            try {
+                allEvents = fetchEvents()
+            } catch (e: Exception) {
+                Log.e("Supabase", "Error fetching events list: ${e.message}")
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+    val event = allEvents.find { it.name == eventTitle }
+
+    LaunchedEffect(event) {
+        event?.id?.let { eventId ->
+            isUserRegistered = isUserRegisteredForEvent(eventId)
+        }
+    }
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
     if (event == null) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -70,7 +117,7 @@ fun EventDetailScreen(navController: NavController, eventTitle: String?) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Box(
             modifier = Modifier
@@ -141,11 +188,11 @@ fun EventDetailScreen(navController: NavController, eventTitle: String?) {
                     ) {
                         Spacer(modifier = Modifier.height(15.dp))
                         Text(
-                            text = event.title,
+                            text = event.name,
                             fontSize = 30.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
-                            color = Color.Black,
+                            color= MaterialTheme.colorScheme.scrim,
                             modifier = Modifier.align(Alignment.CenterHorizontally) // Centers the text explicitly
                         )
                         Spacer(modifier = Modifier.height(25.dp))
@@ -160,13 +207,13 @@ fun EventDetailScreen(navController: NavController, eventTitle: String?) {
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
                         ) {
                             Text(
-                                text = event.description,
+                                text = event.event_title,
                                 color = Color.White,
                                 fontSize = 14.sp,
                                 textAlign = TextAlign.Center
                             )
                         }
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                     }
                 }
             }
@@ -175,7 +222,7 @@ fun EventDetailScreen(navController: NavController, eventTitle: String?) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(top= 0.dp, bottom = 20.dp, start = 20.dp, end = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
@@ -183,14 +230,14 @@ fun EventDetailScreen(navController: NavController, eventTitle: String?) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 25.dp, vertical = 15.dp)
+                        .padding(horizontal = 25.dp, vertical = 0.dp)
                         .shadow(12.dp, shape = RoundedCornerShape(15.dp))
                         .clip(RoundedCornerShape(15.dp))
-                        .background(Color.White)
+                        .background(Color.Black)
                 ) {
                     Image(
-                        painter = painterResource(id = event.posterResId),
-                        contentDescription = "${event.title} Poster",
+                        painter = rememberAsyncImagePainter(event.event_poster),
+                        contentDescription = "${event.name} Poster",
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(500.dp)
@@ -203,7 +250,7 @@ fun EventDetailScreen(navController: NavController, eventTitle: String?) {
                 // 🔹 Event Details
                 Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                     // Event Title
-                    Text(text = event.title, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    Text(text = event.name, fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -216,7 +263,7 @@ fun EventDetailScreen(navController: NavController, eventTitle: String?) {
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = event.date,
+                            text = event.event_date,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.Gray
@@ -233,7 +280,19 @@ fun EventDetailScreen(navController: NavController, eventTitle: String?) {
                             tint = Color.Gray
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = event.time, fontSize = 16.sp, color = Color.Gray)
+                        Text(text = event.event_time, fontSize = 16.sp, color = Color.Gray)
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Venue Row
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painterResource(R.drawable.baseline_location_pin_24),
+                            contentDescription = "Time",
+                            tint = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = event.event_venue, fontSize = 16.sp, color = Color.Gray)
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -242,7 +301,7 @@ fun EventDetailScreen(navController: NavController, eventTitle: String?) {
                     Text(
                         text = event.description,
                         fontSize = 16.sp,
-                        color = Color.DarkGray,
+                        //color = MaterialTheme.colorScheme.outlineVariant,
                         textAlign = TextAlign.Justify,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -254,37 +313,175 @@ fun EventDetailScreen(navController: NavController, eventTitle: String?) {
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    TopicList()
+                    // Check if description_id exists before showing topics
+                    if (event.description_id != null) {
+                        TopicList(event.description_id)
+                    } else {
+                        Text(
+                            text = "No topics available for this event",
+                            fontSize = 16.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(30.dp))
                     // 🔹 Register Button
+                    val isRegistrationClosed = remember {
+                        try {
+                            // Parse the event registration date
+                            val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                            val registrationDate = dateFormat.parse(event.event_registration_date)
+                            val currentDate = java.util.Date()
+
+                            // Check if registration date has passed
+                            registrationDate?.before(currentDate) ?: false
+                        } catch (e: Exception) {
+                            Log.e("EventDetail", "Error parsing date: ${e.message}")
+                            false
+                        }
+                    }
+
                     Button(
-                        onClick = { /* Handle Registration */ },
+                        onClick = {
+                            if (!isUserRegistered) {
+                                navController.navigate("eventregistrationform/${event.name}/${event.id}")
+                            }
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF007BFF))
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = when {
+                                isRegistrationClosed -> Color.Gray
+                                isUserRegistered -> Color.Green.copy(alpha = 0.7f)
+                                else -> Color(0xFF007BFF)
+                            },
+                            disabledContainerColor = Color.Gray
+                        ),
+                        enabled = !isRegistrationClosed && !isUserRegistered
                     ) {
-                        Text(text = "Register Now", fontSize = 18.sp, color = Color.White)
+                        Text(
+                            text = when {
+                                isRegistrationClosed -> "Registration Closed"
+                                isUserRegistered -> "Registered"
+                                else -> "Register Now"
+                            },
+                            fontSize = 18.sp,
+                            color = Color.White
+                        )
                     }
                 }
             }
         }
     }
 }
-@Composable
-fun TopicList() {
-    val topics = remember { getTopics() } // Fetch topics from data file
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        topics.forEach { topic ->
-            TopicItem(topic.name, topic.description, topic.color)
+@Composable
+fun TopicList(description_id: Long) {
+    // State to hold the event description
+    var eventDescription by remember { mutableStateOf<EventDescription?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    // LaunchedEffect to fetch the event description when the composable enters the composition
+    LaunchedEffect(key1 = description_id) {
+        isLoading = true
+        error = null
+
+        try {
+            // Convert description_id to String directly here
+            val result = fetchEventDescription(description_id.toString())
+            eventDescription = result
+        } catch (e: Exception) {
+            error = e.message ?: "Unknown error occurred"
+            Log.e("TopicList", "Error fetching event description for ID $description_id", e)
+        } finally {
+            isLoading = false
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
+            .background(
+                color = colorResource(id = R.color.clubcardcolor),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .clip(RoundedCornerShape(8.dp))
+            .padding(16.dp)
+    ) {
+        when {
+            isLoading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+            error != null -> {
+                Text(
+                    text = "Failed to load topics: $error",
+                    color = Color.Red,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+            eventDescription != null -> {
+                // Extract topic data, filtering out any null topics
+                val topicDataList = buildList {
+                    eventDescription?.Topic1?.let { name ->
+                        eventDescription?.Topic1_description?.let { desc ->
+                            add(TopicData(name, desc))
+                        }
+                    }
+                    eventDescription?.Topic2?.let { name ->
+                        eventDescription?.Topic2_description?.let { desc ->
+                            add(TopicData(name, desc))
+                        }
+                    }
+                    eventDescription?.Topic3?.let { name ->
+                        eventDescription?.Topic3_description?.let { desc ->
+                            add(TopicData(name, desc))
+                        }
+                    }
+                    eventDescription?.Topic4?.let { name ->
+                        eventDescription?.Topic4_description?.let { desc ->
+                            add(TopicData(name, desc))
+                        }
+                    }
+                    eventDescription?.Topic5?.let { name ->
+                        eventDescription?.Topic5_description?.let { desc ->
+                            add(TopicData(name, desc))
+                        }
+                    }
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (topicDataList.isEmpty()) {
+                        Text(
+                            text = "No topics available",
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    } else {
+                        topicDataList.forEachIndexed { index, topicData ->
+                            // Each topic gets its designated color
+                            val color = topicColors[index % topicColors.size]
+                            TopicItem(topicData.name, topicData.description, color)
+                        }
+                    }
+                }
+            }
+            else -> {
+                Text(
+                    text = "No data available",
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
         }
     }
 }
 
-// 🔹 Reusable Topic Item
+// Reusable Topic Item
 @Composable
 fun TopicItem(topicName: String, description: String, color: Color) {
     var isExpanded by remember { mutableStateOf(false) } // Track expansion state
@@ -300,9 +497,25 @@ fun TopicItem(topicName: String, description: String, color: Color) {
                 .background(color.copy(alpha = 0.1f))
                 .padding(vertical = 10.dp, horizontal = 16.dp)
                 .clickable { isExpanded = !isExpanded }, // Toggle expansion
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.CenterStart
         ) {
-            Text(text = topicName, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = color)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = topicName,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = color
+                )
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.ArrowDropDown,
+                    contentDescription = "Expand/Collapse",
+                    tint = color
+                )
+            }
         }
 
         // Expandable Description
@@ -320,7 +533,6 @@ fun TopicItem(topicName: String, description: String, color: Color) {
         }
     }
 }
-
 
 
 

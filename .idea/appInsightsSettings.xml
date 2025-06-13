@@ -10,9 +10,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.akash.smvduclubapp" />
-                  <option name="mobileSdkAppId" value="1:432803079951:android:7ed4ffca2833e103c0807a" />
-                  <option name="projectId" value="smvduclub" />
-                  <option name="projectNumber" value="432803079951" />
+                  <option name="mobileSdkAppId" value="1:24247447539:android:18a25a26a1fea861c76c86" />
+                  <option name="projectId" value="smvduclubapp" />
+                  <option name="projectNumber" value="24247447539" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
